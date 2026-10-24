@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#5c94fc">
+  <title>Super Mario 3D — Shohona 2 Kishilik Sarguzasht</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Asosiy o'yin konteyneri -->
+  <div id="game-wrapper">
+    
+    <!-- Super Mario Klassik HUD (2 Kishilik Ko'p O'yinchi) -->
+    <header id="game-hud">
+      <div class="hud-left">
+        <!-- 1-O'yinchi (Shohona Mario) -->
+        <div class="hud-item p1-hud-container" title="1-O'yinchi: Shohona Mario (👑)">
+          <span class="hud-player-tag tag-p1">👑 MARIO</span>
+          <span id="p1-score" class="score-display">000000</span>
+          <span id="p1-hearts-display" class="hearts-display">❤️❤️❤️</span>
+        </div>
+
+        <!-- Umumiy Tangalar -->
+        <div class="hud-item coins-container" title="To'plangan Oltin Tangalar">
+          <span class="hud-icon coin-icon">🪙</span>
+          <span class="coin-multiply">×</span>
+          <span id="coins-count" class="coin-count">00</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <!-- Dunyo va Bosqich -->
+        <div class="hud-item world-container" title="Hozirgi Dunyo">
+          <span class="world-label">WORLD</span>
+          <span id="level-display" class="world-text">1-1</span>
+        </div>
+
+        <!-- Vaqt hisoblagichi (Countdown Timer) -->
+        <div class="hud-item time-container" title="Qolgan Vaqt">
+          <span class="time-label">TIME</span>
+          <span id="time-display" class="time-text">400</span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <!-- 2-O'yinchi (Shohona Luigi) -->
+        <div class="hud-item p2-hud-container" title="2-O'yinchi: Shohona Luigi (⚔️)">
+          <span class="hud-player-tag tag-p2">⚔️ LUIGI</span>
+          <span id="p2-score" class="score-display">000000</span>
+          <span id="p2-hearts-display" class="hearts-display">💙💙💙</span>
+        </div>
+
+        <!-- 3D / 2D Rejim almashtirish tugmasi -->
+        <button id="btn-dimension-toggle" class="icon-btn" title="3D / 2D Ko'rinishni almashtirish [V]">🌐 3D</button>
+        <!-- Ovozni yoqish/o'chirish -->
+        <button id="btn-sound-toggle" class="icon-btn" title="Ovozni yoqish/o'chirish">🔊</button>
+        <!-- To'liq ekran (Fullscreen) -->
+        <button id="btn-fullscreen-toggle" class="icon-btn" title="To'liq ekran rejimi">⛶</button>
+      </div>
+    </header>
+
+    <!-- Asosiy o'yin maydoni -->
+    <div id="game-main-area">
+      <div id="canvas-container">
+        <canvas id="threeCanvas" width="960" height="720"></canvas>
+        <canvas id="gameCanvas" width="960" height="720" style="display: none;"></canvas>
+        <canvas id="hudCanvas" width="960" height="720" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></canvas>
+        
+        <!-- O'yin ichidagi bildirishnomalar (Toast) -->
+        <div id="toast-notification" class="toast-hidden"></div>
+      </div>
+
+      <!-- Mobil / Sensorli ekranning boshqaruv tugmalari -->
+      <div id="touch-controls">
+        <div class="dpad-container" id="dpad-container">
+          <button class="dpad-btn left" id="dpad-left" aria-label="Chapga">◀</button>
+          <button class="dpad-btn right" id="dpad-right" aria-label="O'ngga">▶</button>
+        </div>
+
+        <div class="action-buttons-container">
+          <button class="action-btn action-btn-jump" id="btn-action-jump" title="Sakrash [Space]">
+            <span class="btn-icon">🦘</span>
+            <span class="btn-text">Sakrash [A]</span>
+          </button>
+          <button class="action-btn action-btn-attack" id="btn-action-attack" title="Yugurish / Hujum [Shift]">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">Yugurish [B]</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boshlang'ich ekran (Start Screen) -->
+    <div id="start-screen" class="modal-screen active">
+      <div class="modal-card mario-card">
+        <div class="pirate-banner">🍄 ⭐ 👑 ⚔️ 🏰 🚩 🪙</div>
+        <h1>SHOHONA SUPER MARIO 3D</h1>
+        <p class="subtitle">2 Kishilik Afsonaviy 3D Platformer: Shohona Mario va Luigi Sarguzashti!</p>
+
+        <div class="rules-box">
+          <h3>📜 O'yin Maqsadi va Qoidalari:</h3>
+          <ul>
+            <li>👥 <strong>2 Kishilik Birgalikda O'yin (Co-op):</strong> <strong>1-O'yinchi (👑 Shohona Mario)</strong> va <strong>2-O'yinchi (⚔️ Shohona Luigi)</strong> bitta klaviaturada yonma-yon o'ynaydi!</li>
+            <li>❓ <strong>Savol Bloklari [?]:</strong> Pastdan kalla bilan urib, tilla tangalar va Sehrli Qo'ziqorinlarni chiqaring!</li>
+            <li>🍄 <strong>Sehrli Qo'ziqorin (Super Mushroom):</strong> Qo'ziqorinni olib 1.5x kattalashing va qo'shimcha zarba olish qudratiga ega bo'ling!</li>
+            <li>🦘 <strong>Dushmanlarni Ezish (Stomp):</strong> Gumbasimon dushmanlarning tepasiga sakrab ularni tekislang! Toshbaqaning kosasini tepib yo'ldagi barcha dushmanlarni yanching!</li>
+            <li>🫧 <strong>Qutqarish Pufagi (Bubble):</strong> Agar bir do'st jarga tushsa, sehrli pufakda qaytib keladi — tirik sherigi uni sakrab urib o'yinga qaytaradi!</li>
+            <li>🚩 <strong>Finish Bayrog'i (Flagpole):</strong> Bosqich oxiridagi baland ustunga sakrab osiling va Shohona Qasrga kiring!</li>
+          </ul>
+        </div>
+
+        <div class="controls-guide">
+          <h3>🎮 2 Kishilik Boshqaruv:</h3>
+          <div class="controls-2p-grid">
+            <div class="p-ctrl-card p1">
+              <div class="p-ctrl-title p1-title">👑 1-O'YINCHI (MARIO)</div>
+              <div><kbd>A</kbd> <kbd>D</kbd> : Chapga / O'ngga yugurish</div>
+              <div><kbd>Space</kbd> / <kbd>W</kbd> : 🦘 Sakrash (Baland sakrash)</div>
+              <div><kbd>Left Shift</kbd> / <kbd>F</kbd> : ⚡ Tez yugurish / Olov otish</div>
+            </div>
+            <div class="p-ctrl-card p2">
+              <div class="p-ctrl-title p2-title">⚔️ 2-O'YINCHI (LUIGI)</div>
+              <div><kbd>←</kbd> <kbd>→</kbd> : Chapga / O'ngga yugurish</div>
+              <div><kbd>Enter</kbd> / <kbd>↑</kbd> : 🦘 Sakrash (Yengil & Baland)</div>
+              <div><kbd>Right Shift</kbd> / <kbd>L</kbd> : ⚡ Tez yugurish / Olov otish</div>
+            </div>
+          </div>
+          <div style="margin-top: 8px; font-size: 12px; color: #b0bec5; text-align: center;">
+            <kbd>V</kbd> : 🌐 3D / 2D Rejimni almashtirish | Yakka o'ynasangiz Luigi sizga avtomatik hamrohlik qiladi!
+          </div>
+        </div>
+
+        <button id="btn-start-game" class="btn-play mario-btn" onclick="if(window.game){window.game.startFromFirstLevel();}">O'YINNI BOSHLASH ⭐</button>
+      </div>
+    </div>
+
+    <!-- O'yin tugadi (Game Over) ekrani -->
+    <div id="game-over-screen" class="modal-screen">
+      <div class="modal-card game-over-card">
+        <div class="result-icon">💀</div>
+        <h2>GAME OVER</h2>
+        <p class="game-over-desc">Barcha jonlar tugadi! Qo'rqmang, qayta urinib ko'ring.</p>
+        
+        <div class="stats-summary">
+          <div class="stat-item">
+            <span>To'xtagan bosqich:</span>
+            <strong id="go-level">WORLD 1-1</strong>
+          </div>
+          <div class="stat-item">
+            <span>Yig'ilgan tangalar:</span>
+            <strong id="go-coins">0 🪙</strong>
+          </div>
+          <div class="stat-item">
+            <span>To'plangan ballar:</span>
+            <strong id="go-score">000000</strong>
+          </div>
+        </div>
+
+        <button id="btn-retry-level" class="btn-play btn-retry">QAYTA O'YNASH 🔄</button>
+      </div>
+    </div>
+
+    <!-- Bosqich yakunlandi (Level Complete / Course Clear) ekrani -->
+    <div id="level-complete-screen" class="modal-screen">
+      <div class="modal-card level-complete-card">
+        <div class="result-icon">🏰🚩⭐</div>
+        <h2 id="lc-title">COURSE CLEAR!</h2>
+        <p class="subtitle" id="lc-desc">Siz bayroq ustunini zabt etib, Shohona Qasrga yetib keldingiz!</p>
+        
+        <div class="stats-summary">
+          <div class="stat-item">
+            <span>Bayroq balandligi bonusi:</span>
+            <strong style="color: #ffd54f;" id="lc-bonus">+5000 Ball!</strong>
+          </div>
+          <div class="stat-item">
+            <span>Jami tangalar:</span>
+            <strong id="lc-coins">0 🪙</strong>
+          </div>
+          <div class="stat-item">
+            <span>Keyingi bosqich:</span>
+            <strong id="lc-next-title" style="color: #69f0ae;">WORLD 1-2</strong>
+          </div>
+        </div>
+
+        <button id="btn-next-level" class="btn-play btn-next">KEYINGI DUNYOGA O'TISH ➡️</button>
+      </div>
+    </div>
+
+    <!-- Yakuniy Katta G'alaba ekrani -->
+    <div id="victory-screen" class="modal-screen">
+      <div class="modal-card victory-card">
+        <div class="result-icon">👑🏆🍄⭐</div>
+        <h2>TABRIKLAYMIZ!</h2>
+        <h3 class="victory-subtitle">Siz Shohona Super Mario 3D dunyosini to'liq zabt etdingiz va Malika Qasrini ozod qildingiz!</h3>
+        
+        <div class="stats-summary">
+          <div class="stat-item">
+            <span>Shohona Mario ballari:</span>
+            <strong id="vic-p1-score" style="color: #ff5252;">000000</strong>
+          </div>
+          <div class="stat-item">
+            <span>Shohona Luigi ballari:</span>
+            <strong id="vic-p2-score" style="color: #69f0ae;">000000</strong>
+          </div>
+          <div class="stat-item">
+            <span>Jami to'plangan tangalar:</span>
+            <strong id="vic-coins" style="color: #ffd54f;">0 🪙</strong>
+          </div>
+        </div>
+
+        <button id="btn-restart-victory" class="btn-play btn-victory">BOSHIDAN O'YNASH 🔄</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Three.js 3D WebGL Dvigateli -->
+  <script src="three.min.js"></script>
+  <!-- O'yin skripti -->
+  <script src="script.js"></script>
+</body>
+</html>
