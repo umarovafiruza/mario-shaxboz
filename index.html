@@ -74,21 +74,29 @@
         <div id="toast-notification" class="toast-hidden"></div>
       </div>
 
-      <!-- Mobil / Sensorli ekranning boshqaruv tugmalari -->
-      <div id="touch-controls">
+      <!-- Mobil / Sensorli ekranning boshqaruv tugmalari (Gamepad Overlay) -->
+      <div id="touch-controls" class="touch-controls-overlay">
+        <!-- Chap tomondagi yo'nalish tugmalari (D-Pad) -->
         <div class="dpad-container" id="dpad-container">
-          <button class="dpad-btn left" id="dpad-left" aria-label="Chapga">◀</button>
-          <button class="dpad-btn right" id="dpad-right" aria-label="O'ngga">▶</button>
+          <button class="dpad-btn dpad-left" id="dpad-left" aria-label="Chapga yugurish" title="Chapga [A]">
+            <span class="dpad-icon">◀</span>
+          </button>
+          <button class="dpad-btn dpad-right" id="dpad-right" aria-label="O'ngga yugurish" title="O'ngga [D]">
+            <span class="dpad-icon">▶</span>
+          </button>
         </div>
 
+        <!-- O'ng tomondagi harakat tugmalari (B: Tezlik, A: Sakrash) -->
         <div class="action-buttons-container">
-          <button class="action-btn action-btn-jump" id="btn-action-jump" title="Sakrash [Space]">
-            <span class="btn-icon">🦘</span>
-            <span class="btn-text">Sakrash [A]</span>
-          </button>
-          <button class="action-btn action-btn-attack" id="btn-action-attack" title="Yugurish / Hujum [Shift]">
+          <button class="action-btn action-btn-attack" id="btn-action-attack" aria-label="Tez yugurish" title="Tez yugurish [Shift]">
+            <span class="btn-letter">B</span>
             <span class="btn-icon">⚡</span>
-            <span class="btn-text">Yugurish [B]</span>
+            <span class="btn-label">Tezlik</span>
+          </button>
+          <button class="action-btn action-btn-jump" id="btn-action-jump" aria-label="Sakrash" title="Sakrash [Space]">
+            <span class="btn-letter">A</span>
+            <span class="btn-icon">🦘</span>
+            <span class="btn-label">Sakrash</span>
           </button>
         </div>
       </div>
@@ -99,42 +107,51 @@
       <div class="modal-card mario-card">
         <div class="pirate-banner">🍄 ⭐ 👑 ⚔️ 🏰 🚩 🪙</div>
         <h1>SHOHONA SUPER MARIO 3D</h1>
-        <p class="subtitle">2 Kishilik Afsonaviy 3D Platformer: Shohona Mario va Luigi Sarguzashti!</p>
+        <p class="subtitle">Afsonaviy 3D Platformer: Shohona Mario va Luigi Sarguzashti!</p>
 
-        <div class="rules-box">
-          <h3>📜 O'yin Maqsadi va Qoidalari:</h3>
-          <ul>
-            <li>👥 <strong>2 Kishilik Birgalikda O'yin (Co-op):</strong> <strong>1-O'yinchi (👑 Shohona Mario)</strong> va <strong>2-O'yinchi (⚔️ Shohona Luigi)</strong> bitta klaviaturada yonma-yon o'ynaydi!</li>
-            <li>❓ <strong>Savol Bloklari [?]:</strong> Pastdan kalla bilan urib, tilla tangalar va Sehrli Qo'ziqorinlarni chiqaring!</li>
-            <li>🍄 <strong>Sehrli Qo'ziqorin (Super Mushroom):</strong> Qo'ziqorinni olib 1.5x kattalashing va qo'shimcha zarba olish qudratiga ega bo'ling!</li>
-            <li>🦘 <strong>Dushmanlarni Ezish (Stomp):</strong> Gumbasimon dushmanlarning tepasiga sakrab ularni tekislang! Toshbaqaning kosasini tepib yo'ldagi barcha dushmanlarni yanching!</li>
-            <li>🫧 <strong>Qutqarish Pufagi (Bubble):</strong> Agar bir do'st jarga tushsa, sehrli pufakda qaytib keladi — tirik sherigi uni sakrab urib o'yinga qaytaradi!</li>
-            <li>🚩 <strong>Finish Bayrog'i (Flagpole):</strong> Bosqich oxiridagi baland ustunga sakrab osiling va Shohona Qasrga kiring!</li>
-          </ul>
-        </div>
-
-        <div class="controls-guide">
-          <h3>🎮 2 Kishilik Boshqaruv:</h3>
-          <div class="controls-2p-grid">
-            <div class="p-ctrl-card p1">
-              <div class="p-ctrl-title p1-title">👑 1-O'YINCHI (MARIO)</div>
-              <div><kbd>A</kbd> <kbd>D</kbd> : Chapga / O'ngga yugurish</div>
-              <div><kbd>Space</kbd> / <kbd>W</kbd> : 🦘 Sakrash (Baland sakrash)</div>
-              <div><kbd>Left Shift</kbd> / <kbd>F</kbd> : ⚡ Tez yugurish / Olov otish</div>
-            </div>
-            <div class="p-ctrl-card p2">
-              <div class="p-ctrl-title p2-title">⚔️ 2-O'YINCHI (LUIGI)</div>
-              <div><kbd>←</kbd> <kbd>→</kbd> : Chapga / O'ngga yugurish</div>
-              <div><kbd>Enter</kbd> / <kbd>↑</kbd> : 🦘 Sakrash (Yengil & Baland)</div>
-              <div><kbd>Right Shift</kbd> / <kbd>L</kbd> : ⚡ Tez yugurish / Olov otish</div>
-            </div>
-          </div>
-          <div style="margin-top: 8px; font-size: 12px; color: #b0bec5; text-align: center;">
-            <kbd>V</kbd> : 🌐 3D / 2D Rejimni almashtirish | Yakka o'ynasangiz Luigi sizga avtomatik hamrohlik qiladi!
+        <!-- Mobil uchun tezkor maslahat -->
+        <div class="mobile-controls-banner">
+          <div class="mcb-title">📱 Mobil Boshqaruv:</div>
+          <div class="mcb-body">
+            <span>👈 <strong>Chapda:</strong> ◀ ▶ Harakatlanish</span>
+            <span>👉 <strong>O'ngda:</strong> 🦘 [A] Sakrash | ⚡ [B] Tez yugurish</span>
           </div>
         </div>
 
         <button id="btn-start-game" class="btn-play mario-btn" onclick="if(window.game){window.game.startFromFirstLevel();}">O'YINNI BOSHLASH ⭐</button>
+
+        <div class="rules-box">
+          <h3>📜 O'yin Maqsadi va Qoidalari:</h3>
+          <ul>
+            <li>👥 <strong>2 Kishilik Birgalikda O'yin (Co-op):</strong> <strong>1-O'yinchi (👑 Shohona Mario)</strong> va <strong>2-O'yinchi (⚔️ Shohona Luigi)</strong> birgalikda o'ynaydi!</li>
+            <li>❓ <strong>Savol Bloklari [?]:</strong> Pastdan kalla bilan urib, tilla tangalar va Sehrli Qo'ziqorinlarni chiqaring!</li>
+            <li>🍄 <strong>Sehrli Qo'ziqorin (Super Mushroom):</strong> Olib 1.5x kattalashing va qo'shimcha qudratga ega bo'ling!</li>
+            <li>🦘 <strong>Dushmanlarni Ezish (Stomp):</strong> Dushmanlarning tepasiga sakrab ularni yanching!</li>
+            <li>🫧 <strong>Qutqarish Pufagi (Bubble):</strong> Agar bir do'st yiqilsa, sehrli pufakda qaytadi — sherigi uni sakrab urib qutqaradi!</li>
+            <li>🚩 <strong>Finish Bayrog'i (Flagpole):</strong> Bosqich oxiridagi ustunga sakrab Shohona Qasrga kiring!</li>
+          </ul>
+        </div>
+
+        <div class="controls-guide">
+          <h3>🎮 Klaviatura Boshqaruvi:</h3>
+          <div class="controls-2p-grid">
+            <div class="p-ctrl-card p1">
+              <div class="p-ctrl-title p1-title">👑 1-O'YINCHI (MARIO)</div>
+              <div><kbd>A</kbd> <kbd>D</kbd> : Chapga / O'ngga</div>
+              <div><kbd>Space</kbd> / <kbd>W</kbd> : 🦘 Sakrash</div>
+              <div><kbd>Left Shift</kbd> / <kbd>F</kbd> : ⚡ Tez yugurish</div>
+            </div>
+            <div class="p-ctrl-card p2">
+              <div class="p-ctrl-title p2-title">⚔️ 2-O'YINCHI (LUIGI)</div>
+              <div><kbd>←</kbd> <kbd>→</kbd> : Chapga / O'ngga</div>
+              <div><kbd>Enter</kbd> / <kbd>↑</kbd> : 🦘 Sakrash</div>
+              <div><kbd>Right Shift</kbd> / <kbd>L</kbd> : ⚡ Tez yugurish</div>
+            </div>
+          </div>
+          <div style="margin-top: 8px; font-size: 12px; color: #b0bec5; text-align: center;">
+            <kbd>V</kbd> : 🌐 3D / 2D Rejim | Yakka o'ynasangiz Luigi sizga avtomatik hamroh bo'ladi!
+          </div>
+        </div>
       </div>
     </div>
 

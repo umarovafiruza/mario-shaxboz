@@ -33,52 +33,64 @@ html, body {
   overflow: hidden;
   touch-action: none;
   overscroll-behavior: none;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   font-family: var(--font-family);
-  background: radial-gradient(circle at center, #1e3c72 0%, #152238 60%, #0a111c 100%);
+  background: #08121f;
   color: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
   user-select: none;
   -webkit-user-select: none;
-  padding: 8px;
+  -webkit-touch-callout: none;
+  position: fixed;
+  inset: 0;
 }
 
-/* Asosiy konteyner */
+/* Asosiy to'liq ekran konteyneri (Full Viewport Game Stage) */
 #game-wrapper {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 980px;
-  background: rgba(10, 20, 35, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--border-radius-lg);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(29, 112, 184, 0.25);
-  backdrop-filter: blur(8px);
-  padding: 12px;
+  overflow: hidden;
+  background: #000000;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* ============================================================
-   HUD (YUQORI MA'LUMOTLAR PANELI)
+   HUD (YUQORI MA'LUMOTLAR PANELI - GLASSMORPHIC OVERLAY)
 ============================================================ */
 #game-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: var(--color-hud-bg);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--border-radius-md);
-  padding: 8px 16px;
-  margin-bottom: 10px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
-  gap: 10px;
-  flex-wrap: wrap;
+  background: linear-gradient(180deg, rgba(8, 16, 30, 0.88) 0%, rgba(8, 16, 30, 0.45) 65%, transparent 100%);
+  border: none;
+  border-radius: 0;
+  padding: max(8px, env(safe-area-inset-top, 8px)) max(12px, env(safe-area-inset-right, 12px)) 10px max(12px, env(safe-area-inset-left, 12px));
+  margin: 0;
+  box-shadow: none;
+  gap: 8px;
+  flex-wrap: nowrap;
+  pointer-events: none;
 }
 
 .hud-left, .hud-center, .hud-right {
@@ -288,54 +300,66 @@ body {
    CANVAS VA ASOSIY O'YIN MAYDONI
 ============================================================ */
 #game-main-area {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  display: block;
 }
 
 #canvas-container {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #0d2847;
-  border-radius: var(--border-radius-md);
+  height: 100%;
   overflow: hidden;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+  background: #5c94fc;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 #threeCanvas, #gameCanvas {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  max-width: 960px;
-  max-height: 720px;
-  aspect-ratio: 4 / 3;
-  object-fit: contain;
+  height: 100%;
+  display: block;
   touch-action: none;
-  background-color: #0b3c5d;
+  background-color: #5c94fc;
+}
+
+#hudCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: transparent !important;
+  z-index: 5;
 }
 
 /* Toast Bildirishnomalar */
 #toast-notification {
   position: absolute;
-  top: 16px;
+  top: calc(max(10px, env(safe-area-inset-top, 10px)) + 52px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(18, 26, 38, 0.92);
-  border: 1px solid var(--color-gold);
+  background: rgba(18, 26, 38, 0.94);
+  border: 1.5px solid var(--color-gold);
   color: #fff;
   padding: 8px 18px;
   border-radius: 30px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 14px rgba(255, 193, 7, 0.35);
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
-  z-index: 20;
+  z-index: 55;
+  white-space: nowrap;
+  max-width: 90vw;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .toast-hidden {
@@ -344,148 +368,154 @@ body {
 }
 
 /* ============================================================
-   MOBIL VA SENSORLI BOSHQARUV TUGMALARI
+   MOBIL VA SENSORLI BOSHQARUV TUGMALARI (TOUCH CONTROLS)
 ============================================================ */
 #touch-controls {
   display: none; /* Standart kompyuterda yashirin, sensorli yoki kichik ekranda faollashadi */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
   width: 100%;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px 8px 2px 8px;
-  gap: 12px;
-  touch-action: none;
-  user-select: none;
-}
-
-/* D-Pad (Sensorli Yo'nalish Krossi) */
-.dpad-container {
-  position: relative;
-  width: 140px;
-  height: 140px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  padding: 0 max(20px, env(safe-area-inset-right, 20px)) max(22px, env(safe-area-inset-bottom, 22px)) max(20px, env(safe-area-inset-left, 20px));
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-}
-
-.dpad-middle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dpad-center {
-  width: 38px;
-  height: 38px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5px dashed rgba(255, 255, 255, 0.18);
-  border-radius: 50%;
   pointer-events: none;
 }
 
+/* D-Pad (Chap va O'ng yo'nalish tugmalari) */
+.dpad-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
 .dpad-btn {
-  width: 46px;
-  height: 46px;
-  background: linear-gradient(145deg, #1e293b, #0f172a);
-  border: 2px solid rgba(255, 255, 255, 0.22);
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(40, 60, 90, 0.75), rgba(15, 23, 42, 0.88));
+  border: 2.5px solid rgba(56, 189, 248, 0.5);
   color: #ffffff;
-  border-radius: 12px;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 900;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   touch-action: none;
   user-select: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
-  transition: background 0.1s, transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+  -webkit-user-select: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.25);
+  transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease;
 }
 
 .dpad-btn:active, .dpad-btn.active {
-  background: linear-gradient(145deg, #0284c7, #0369a1);
-  transform: scale(0.92);
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
+  transform: scale(0.91);
+  background: radial-gradient(circle at 35% 35%, rgba(2, 132, 199, 0.95), rgba(3, 105, 161, 0.98));
   border-color: #38bdf8;
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.9), inset 0 2px 6px rgba(255, 255, 255, 0.4);
   color: #ffffff;
 }
 
-/* Harakat tugmalari (Action buttons) */
+/* O'ng tomondagi Harakat tugmalari (Action buttons: B va A) */
 .action-buttons-container {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 16px;
+  pointer-events: auto;
   touch-action: none;
-  user-select: none;
 }
 
 .action-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 125px;
-  min-height: 46px;
-  background: linear-gradient(145deg, #334155, #1e293b);
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: var(--border-radius-md);
-  font-size: 13px;
-  font-weight: 700;
   cursor: pointer;
   touch-action: none;
   user-select: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transition: all 0.15s ease;
+  -webkit-user-select: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+  position: relative;
 }
 
-.action-btn:active, .action-btn.active {
-  transform: scale(0.93);
-  box-shadow: 0 0 14px rgba(255, 193, 7, 0.6);
+.action-btn .btn-letter {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 900;
+  opacity: 0.85;
+  letter-spacing: 0.5px;
 }
 
+.action-btn .btn-icon {
+  font-size: 24px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.action-btn .btn-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* B Tugmasi: Tez yugurish (Sprint / Dash) */
 #btn-action-attack {
-  border-color: rgba(239, 68, 68, 0.7);
-  background: linear-gradient(145deg, #b91c1c, #7f1d1d);
-  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.4);
-}
-
-#btn-action-attack:hover {
-  background: linear-gradient(145deg, #dc2626, #991b1b);
-  border-color: #f87171;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(220, 38, 38, 0.78), rgba(153, 27, 27, 0.9));
+  border: 2.5px solid rgba(248, 113, 113, 0.6);
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(185, 28, 28, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  margin-bottom: 4px;
 }
 
 #btn-action-attack:active, #btn-action-attack.active {
-  box-shadow: 0 0 16px rgba(248, 113, 113, 0.9);
-  transform: scale(0.93);
+  transform: scale(0.91);
+  background: radial-gradient(circle at 35% 35%, rgba(239, 68, 68, 0.95), rgba(185, 28, 28, 0.98));
+  border-color: #f87171;
+  box-shadow: 0 0 24px rgba(248, 113, 113, 0.95), inset 0 2px 6px rgba(255, 255, 255, 0.5);
 }
 
+/* A Tugmasi: Sakrash (Jump) */
 #btn-action-jump {
-  border-color: rgba(16, 185, 129, 0.7);
-  background: linear-gradient(145deg, #059669, #047857);
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(16, 185, 129, 0.82), rgba(5, 150, 105, 0.92));
+  border: 3px solid rgba(52, 211, 153, 0.75);
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(5, 150, 105, 0.55), inset 0 2px 5px rgba(255, 255, 255, 0.4);
 }
 
-#btn-action-jump:hover {
-  background: linear-gradient(145deg, #10b981, #059669);
-  border-color: #34d399;
+#btn-action-jump .btn-icon {
+  font-size: 28px;
 }
 
 #btn-action-jump:active, #btn-action-jump.active {
-  box-shadow: 0 0 16px rgba(52, 211, 153, 0.9);
-  transform: scale(0.93);
+  transform: scale(0.91);
+  background: radial-gradient(circle at 35% 35%, rgba(34, 197, 94, 0.95), rgba(21, 128, 61, 0.98));
+  border-color: #4ade80;
+  box-shadow: 0 0 28px rgba(74, 222, 128, 0.95), inset 0 2px 6px rgba(255, 255, 255, 0.55);
 }
-
-#btn-action-car {
-  border-color: rgba(56, 189, 248, 0.4);
-}
-
-#btn-action-refuel {
-  border-color: rgba(250, 204, 21, 0.4);
 }
 
 /* Mashina yaqinida bo'lganda animatsion chaqnash */
@@ -518,22 +548,23 @@ body {
    MODAL OYNALAR (BOSHLASH, YUTUQ, MAG'LUBIYAT)
 ============================================================ */
 .modal-screen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   background: rgba(5, 10, 20, 0.88);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 16px;
+  padding: max(16px, env(safe-area-inset-top, 16px)) max(16px, env(safe-area-inset-right, 16px)) max(16px, env(safe-area-inset-bottom, 16px)) max(16px, env(safe-area-inset-left, 16px));
   z-index: 100;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
-  border-radius: var(--border-radius-lg);
+  border-radius: 0;
 }
 
 .modal-screen.active {
@@ -817,42 +848,20 @@ kbd {
 /* ============================================================
    RESPONSIVELIK VA MOBIL EKRANLARGA MOSLASHUVCHANLIK
 ============================================================ */
-@media (max-width: 900px), (pointer: coarse), (hover: none) {
+/* ============================================================
+   RESPONSIVELIK VA MOBIL EKRANLARGA MOSLASHUVCHANLIK (MOBILE UI/UX)
+============================================================ */
+@media (max-width: 1024px), (pointer: coarse), (hover: none) {
   #touch-controls {
-    display: flex;
+    display: flex !important;
   }
 }
 
-/* 1. MOBIL PORTRAIT REJIMI (Tik ushlaganda: Telefonlar va planshetlar) */
+/* 1. MOBIL PORTRAIT REJIMI (Telefonlar va Planshetlar - Tik ushlaganda) */
 @media (max-width: 768px) {
-  body {
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    justify-content: flex-start;
-    align-items: stretch;
-  }
-
-  #game-wrapper {
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    height: 100dvh;
-    padding: 4px 6px;
-    border: none;
-    border-radius: 0;
-    justify-content: space-between;
-  }
-
   #game-hud {
-    padding: 4px 8px;
-    margin-bottom: 4px;
-    font-size: 12px;
+    padding: max(6px, env(safe-area-inset-top, 6px)) max(10px, env(safe-area-inset-right, 10px)) 6px max(10px, env(safe-area-inset-left, 10px));
     gap: 4px;
-    border-radius: 8px;
-    justify-content: space-between;
   }
 
   .hud-left, .hud-center, .hud-right {
@@ -861,95 +870,74 @@ kbd {
 
   .hud-item {
     padding: 3px 6px;
-    font-size: 12px;
+    font-size: 11px;
     gap: 3px;
     border-radius: 6px;
   }
 
-  .hud-icon {
-    font-size: 14px;
+  .hud-player-tag {
+    font-size: 9px;
+    padding: 1px 4px;
   }
 
-  #hearts-display {
-    font-size: 12px;
-    letter-spacing: 1px;
-  }
-
-  .fuel-bar-outer {
-    width: 60px;
-    height: 11px;
-  }
-
-  #fuel-text {
+  .score-display {
     font-size: 11px;
   }
 
-  #player-status-badge {
+  .world-text, .time-text {
     font-size: 11px;
-    padding: 2px 6px;
+  }
+
+  .world-label, .time-label {
+    font-size: 8px;
+  }
+
+  /* Tor ekranda 2-o'yinchi (Luigi) ballari yashirilib, sodda nishon qoladi */
+  .p2-hud-container .score-display {
+    display: none;
   }
 
   .icon-btn {
-    padding: 4px 7px;
-    font-size: 14px;
-  }
-
-  #game-main-area {
-    flex: 1;
-    min-height: 0;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  #canvas-container {
-    width: 100%;
-    max-height: 52vh;
-    border-radius: 8px;
-  }
-
-  #gameCanvas {
-    width: 100%;
-    max-height: 52vh;
-    aspect-ratio: 4 / 3;
+    padding: 4px 6px;
+    font-size: 13px;
   }
 
   #touch-controls {
-    padding: 6px 4px 2px 4px;
-    width: 100%;
-    margin-top: auto;
+    padding: 0 max(16px, env(safe-area-inset-right, 16px)) max(18px, env(safe-area-inset-bottom, 18px)) max(16px, env(safe-area-inset-left, 16px));
   }
 
   .dpad-container {
-    width: 136px;
-    height: 136px;
+    gap: 12px;
   }
 
   .dpad-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
-    border-radius: 10px;
-  }
-
-  .dpad-center {
-    width: 36px;
-    height: 36px;
+    width: 60px;
+    height: 60px;
+    font-size: 22px;
   }
 
   .action-buttons-container {
-    gap: 8px;
+    gap: 12px;
   }
 
-  .action-btn {
-    min-width: 115px;
-    min-height: 44px;
-    padding: 6px 10px;
-    font-size: 12px;
+  #btn-action-attack {
+    width: 58px;
+    height: 58px;
+  }
+
+  #btn-action-jump {
+    width: 70px;
+    height: 70px;
+  }
+
+  #btn-action-jump .btn-icon {
+    font-size: 26px;
   }
 
   .modal-card {
-    padding: 14px 12px;
-    max-height: 90vh;
+    padding: 16px 14px;
+    max-height: calc(100dvh - 24px);
+    width: 95%;
   }
 
   .modal-card h1 {
@@ -961,7 +949,7 @@ kbd {
   }
 
   .pirate-banner {
-    font-size: 30px;
+    font-size: 26px;
     margin-bottom: 2px;
   }
 
@@ -976,147 +964,129 @@ kbd {
   }
 
   .btn-play {
-    font-size: 14px;
-    padding: 10px 20px;
+    font-size: 15px;
+    padding: 12px 20px;
+    margin-top: 6px;
+    margin-bottom: 10px;
   }
 }
 
-/* 2. MOBIL LANDSCAPE REJIMI (Yotiq ushlaganda: GameBoy / Nintendo Switch konsol uslubi) */
-@media (orientation: landscape) and (max-height: 540px) {
-  body {
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-  }
-
-  #game-wrapper {
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    height: 100dvh;
-    padding: 2px 6px;
-    border: none;
-    border-radius: 0;
-    justify-content: flex-start;
-  }
-
-  #game-hud {
-    padding: 2px 8px;
-    margin-bottom: 2px;
-    font-size: 11px;
-    gap: 3px;
-    border-radius: 6px;
-    flex-wrap: nowrap;
-  }
-
-  .hud-item {
-    padding: 2px 6px;
-    font-size: 11px;
-    gap: 2px;
-  }
-
-  .hud-icon {
-    font-size: 13px;
-  }
-
-  .fuel-bar-outer {
-    width: 50px;
-    height: 10px;
-  }
-
-  #game-main-area {
-    display: grid;
-    grid-template-columns: 140px 1fr 140px;
-    grid-template-areas: "dpad canvas actions";
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-  }
-
-  #canvas-container {
-    grid-area: canvas;
-    height: 100%;
-    max-height: calc(100dvh - 36px);
-    width: auto;
-    margin: 0 auto;
-    border-radius: 8px;
-  }
-
-  #gameCanvas {
-    height: 100%;
-    max-height: calc(100dvh - 36px);
-    width: auto;
-    aspect-ratio: 4 / 3;
-  }
-
-  #touch-controls {
-    display: contents; /* D-Pad chapga, Harakat tugmalari o'ngga joylashadi */
+/* 2. JUDA KICHIK EKRANLAR (iPhone SE, kichik telefonlar < 420px) */
+@media (max-width: 420px) {
+  .p2-hud-container {
+    display: none; /* Ekran juda tor bo'lsa P1 va dunyo ko'rsatkichlariga ustunlik beriladi */
   }
 
   .dpad-container {
-    grid-area: dpad;
-    justify-self: center;
-    align-self: center;
-    width: 130px;
-    height: 130px;
+    gap: 10px;
   }
 
   .dpad-btn {
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
-  }
-
-  .dpad-center {
-    width: 34px;
-    height: 34px;
+    width: 54px;
+    height: 54px;
+    font-size: 20px;
   }
 
   .action-buttons-container {
-    grid-area: actions;
-    justify-self: center;
-    align-self: center;
+    gap: 10px;
+  }
+
+  #btn-action-attack {
+    width: 52px;
+    height: 52px;
+  }
+
+  #btn-action-jump {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* 3. MOBIL LANDSCAPE REJIMI (Yotiq ushlaganda: GamePad / Nintendo Switch konsol uslubi) */
+@media (orientation: landscape) and (max-height: 560px) {
+  #game-hud {
+    padding: max(4px, env(safe-area-inset-top, 4px)) max(18px, env(safe-area-inset-right, 18px)) 4px max(18px, env(safe-area-inset-left, 18px));
     gap: 8px;
   }
 
-  .action-btn {
-    min-width: 115px;
-    min-height: 40px;
-    padding: 6px 8px;
+  .hud-item {
+    padding: 2px 7px;
     font-size: 11px;
+    gap: 3px;
+  }
+
+  #touch-controls {
+    padding: 0 max(24px, env(safe-area-inset-right, 24px)) max(14px, env(safe-area-inset-bottom, 14px)) max(24px, env(safe-area-inset-left, 24px));
+  }
+
+  .dpad-container {
+    gap: 14px;
+  }
+
+  .dpad-btn {
+    width: 58px;
+    height: 58px;
+    font-size: 22px;
+  }
+
+  .action-buttons-container {
+    gap: 14px;
+  }
+
+  #btn-action-attack {
+    width: 54px;
+    height: 54px;
+  }
+
+  #btn-action-jump {
+    width: 66px;
+    height: 66px;
   }
 
   .modal-card {
-    max-height: 94vh;
-    padding: 8px 14px;
+    max-height: calc(100dvh - 16px);
+    padding: 10px 18px;
   }
 
   .modal-card h1 {
-    font-size: 18px;
-  }
-
-  .modal-card h2 {
-    font-size: 16px;
-  }
-
-  .pirate-banner {
-    font-size: 24px;
-    margin-bottom: 2px;
+    font-size: 17px;
   }
 
   .rules-box {
-    max-height: 70px;
+    max-height: 85px;
     overflow-y: auto;
   }
 
   .controls-guide {
-    display: none; /* Landshaftda ekranni tejash */
+    display: none; /* Landshaftda klaviatura yo'riqnomasi yashirilib ekranni tejaydi */
   }
+}
+
+/* Mobil boshqaruv yo'riqnomasi banneri */
+.mobile-controls-banner {
+  background: rgba(3, 169, 244, 0.16);
+  border: 1.5px solid rgba(3, 169, 244, 0.45);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.mcb-title {
+  font-weight: 800;
+  color: #4fc3f7;
+  font-size: 12px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mcb-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  color: #e1f5fe;
 }
 
 

@@ -895,8 +895,6 @@ class ThreeRenderer {
         alpha: false,
         powerPreference: 'high-performance'
       });
-      this.renderer.setSize(960, 720);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.5));
       this.renderer.outputEncoding = THREE.sRGBEncoding;
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure = 1.25;
@@ -916,8 +914,12 @@ class ThreeRenderer {
     this.scene.fog = new THREE.Fog(0x5c94fc, 800, 2400);
 
     // 2.5D / 3D Side-scroller Kamera
-    this.camera = new THREE.PerspectiveCamera(46, 960 / 720, 10, 4500);
+    const initialAspect = window.innerWidth / Math.max(1, window.innerHeight);
+    this.camera = new THREE.PerspectiveCamera(46, initialAspect, 10, 4500);
     this.camera.position.set(0, 120, 360);
+
+    // O'lchamni to'liq ekranga moslashtirish (Responsive Viewport)
+    this.resize();
 
     // Guruhlar
     this.worldGroup = new THREE.Group();
@@ -939,6 +941,48 @@ class ThreeRenderer {
     this.setupPlayer1Mesh();
     this.setupPlayer2Mesh();
     this.setupFlagpoleAndCastle();
+  }
+
+  resize() {
+    if (!this.renderer || !this.canvas) return;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    this.renderer.setSize(width, height, false);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    const aspect = width / Math.max(1, height);
+    this.camera.aspect = aspect;
+
+    // Mobil telefonlar uchun (Portrait va Landscape) moslashuvchan FOV
+    if (aspect < 1.0) {
+      // Tik ushlaganda ekran tor bo'lgani sababli gorizontal ko'rinishni saqlash
+      this.camera.fov = Math.min(68, Math.round(46 / Math.sqrt(aspect)));
+    } else {
+      this.camera.fov = 46;
+    }
+    this.camera.updateProjectionMatrix();
+  }
+
+  snapCamera(game) {
+    const p1 = game.player;
+    const p2 = game.player2;
+    if (!p1 || !p2) return;
+    const activeX = (p1.x + p2.x) / 2;
+    const activeY = (p1.y + p2.y) / 2;
+    const isPortrait = this.camera.aspect < 1.0;
+    let targetZ = 320;
+    if (isPortrait) targetZ += (1.0 - this.camera.aspect) * 80;
+
+    const halfFovRad = (this.camera.fov * Math.PI) / 360;
+    const halfWidth3D = Math.tan(halfFovRad) * targetZ * this.camera.aspect;
+    const minCamX = Math.max(30, halfWidth3D - 10);
+    const targetCamX = Math.max(minCamX, activeX + (isPortrait ? 20 : 60));
+    const targetCamY = isPortrait ? Math.max(75, activeY * 0.4 + 60) : Math.max(100, activeY * 0.4 + 80);
+
+    this.camera.position.set(targetCamX, targetCamY, targetZ);
+    const lookX = targetCamX;
+    const lookY = isPortrait ? (activeY * 0.3 + 45) : (targetCamY - 20);
+    this.camera.lookAt(lookX, lookY, 0);
   }
 
   setupLights() {
@@ -1560,16 +1604,25 @@ class ThreeRenderer {
       else if (p2.inBubble) { activeX = p1.x; activeY = p1.y; }
 
       const dist = Math.abs(p1.x - p2.x);
-      const targetZ = 340 + Math.min(180, dist * 0.45);
-      const targetCamX = Math.max(380, activeX);
-      const targetCamY = Math.max(120, activeY * 0.4 + 90);
+      const isPortrait = this.camera.aspect < 1.0;
+      let targetZ = 320 + Math.min(180, dist * 0.45);
+      if (isPortrait) {
+        targetZ += (1.0 - this.camera.aspect) * 80;
+      }
 
-      this.camera.position.x += (targetCamX - this.camera.position.x) * 0.09;
-      this.camera.position.y += (targetCamY - this.camera.position.y) * 0.09;
-      this.camera.position.z += (targetZ - this.camera.position.z) * 0.08;
+      // Dunyo birligida kamera ko'rish maydoni yarmi (Ekran chap cheti x = 0 da to'xtashi uchun)
+      const halfFovRad = (this.camera.fov * Math.PI) / 360;
+      const halfWidth3D = Math.tan(halfFovRad) * targetZ * this.camera.aspect;
+      const minCamX = Math.max(30, halfWidth3D - 10);
+      const targetCamX = Math.max(minCamX, activeX + (isPortrait ? 20 : 60));
+      const targetCamY = isPortrait ? Math.max(75, activeY * 0.4 + 60) : Math.max(100, activeY * 0.4 + 80);
+
+      this.camera.position.x += (targetCamX - this.camera.position.x) * 0.12;
+      this.camera.position.y += (targetCamY - this.camera.position.y) * 0.12;
+      this.camera.position.z += (targetZ - this.camera.position.z) * 0.1;
 
       let lookX = this.camera.position.x;
-      let lookY = this.camera.position.y - 20;
+      let lookY = isPortrait ? (activeY * 0.3 + 45) : (this.camera.position.y - 20);
 
       if (game.shakeTimer > 0) {
         lookX += (Math.random() - 0.5) * game.shakeIntensity * 2;
@@ -1675,6 +1728,30 @@ class GameEngine {
       if (this.canvas) this.canvas.style.display = 'block';
       if (this.btnDimensionToggle) this.btnDimensionToggle.textContent = '🗺️ 2D';
     }
+
+    // Ekran o'lchami o'zgarganda yoki telefon burilganda moslashish
+    this.handleResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (this.canvas) {
+        this.canvas.width = w;
+        this.canvas.height = h;
+      }
+      if (this.hudCanvas) {
+        this.hudCanvas.width = w;
+        this.hudCanvas.height = h;
+      }
+      if (this.threeRenderer && this.threeRenderer.enabled) {
+        this.threeRenderer.resize();
+      }
+    };
+
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(this.handleResize, 100);
+      setTimeout(this.handleResize, 350);
+    });
+    this.handleResize();
 
     this.bindEvents();
     this.buildWorld1_1();
@@ -1877,39 +1954,118 @@ class GameEngine {
       if (['ShiftRight', 'KeyL'].includes(e.code)) this.keysP2.run = false;
     });
 
-    // Sensorli boshqaruv
-    const setupBtn = (id, obj, key) => {
-      const btn = document.getElementById(id);
-      if (!btn) return;
-      const start = (e) => { e.preventDefault(); resumeAudio(); obj[key] = true; };
-      const end = (e) => { e.preventDefault(); obj[key] = false; };
-      btn.addEventListener('touchstart', start, { passive: false });
-      btn.addEventListener('touchend', end, { passive: false });
-      btn.addEventListener('mousedown', start);
-      btn.addEventListener('mouseup', end);
+    // Sensorli va Mobil boshqaruv (Multi-touch, haptic feedback va tactile UX)
+    const triggerHaptic = () => {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate(10); } catch(e) {}
+      }
     };
 
-    setupBtn('dpad-left', this.keysP1, 'left');
-    setupBtn('dpad-right', this.keysP1, 'right');
+    const attachButtonPress = (btnElement, onPress, onRelease) => {
+      if (!btnElement) return;
 
+      const handlePress = (e) => {
+        if (e && e.cancelable) e.preventDefault();
+        resumeAudio();
+        triggerHaptic();
+        btnElement.classList.add('active');
+        if (onPress) onPress();
+      };
+
+      const handleRelease = (e) => {
+        if (e && e.cancelable) e.preventDefault();
+        btnElement.classList.remove('active');
+        if (onRelease) onRelease();
+      };
+
+      btnElement.addEventListener('pointerdown', handlePress, { passive: false });
+      btnElement.addEventListener('pointerup', handleRelease, { passive: false });
+      btnElement.addEventListener('pointercancel', handleRelease, { passive: false });
+      btnElement.addEventListener('pointerleave', handleRelease, { passive: false });
+
+      btnElement.addEventListener('touchstart', handlePress, { passive: false });
+      btnElement.addEventListener('touchend', handleRelease, { passive: false });
+      btnElement.addEventListener('touchcancel', handleRelease, { passive: false });
+    };
+
+    // Chap tomondagi yo'nalish tugmalari (D-Pad)
+    const btnLeft = document.getElementById('dpad-left');
+    const btnRight = document.getElementById('dpad-right');
+
+    attachButtonPress(btnLeft,
+      () => { this.keysP1.left = true; },
+      () => { this.keysP1.left = false; }
+    );
+
+    attachButtonPress(btnRight,
+      () => { this.keysP1.right = true; },
+      () => { this.keysP1.right = false; }
+    );
+
+    // O'ng tomondagi Sakrash (A) va Tez yugurish (B)
     const jumpBtn = document.getElementById('btn-action-jump');
-    if (jumpBtn) {
-      jumpBtn.addEventListener('click', (e) => {
+    attachButtonPress(jumpBtn,
+      () => {
+        this.keysP1.jump = true;
+        this.player.jump(this);
+      },
+      () => {
+        this.keysP1.jump = false;
+      }
+    );
+
+    const attackBtn = document.getElementById('btn-action-attack');
+    attachButtonPress(attackBtn,
+      () => {
+        this.keysP1.run = true;
+      },
+      () => {
+        this.keysP1.run = false;
+      }
+    );
+
+    // To'liq ekran (Fullscreen Toggle)
+    const btnFS = document.getElementById('btn-fullscreen-toggle');
+    if (btnFS) {
+      const toggleFullscreen = (e) => {
         if (e) e.preventDefault();
         resumeAudio();
-        this.player.jump(this);
-      });
-      jumpBtn.addEventListener('touchstart', (e) => {
-        if (e) e.preventDefault();
-        resumeAudio();
-        this.player.jump(this);
-      }, { passive: false });
+        triggerHaptic();
+
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const docEl = document.documentElement;
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(() => {});
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      };
+
+      btnFS.addEventListener('click', toggleFullscreen);
+      btnFS.addEventListener('touchstart', toggleFullscreen, { passive: false });
+
+      const onFSChange = () => {
+        const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        btnFS.textContent = isFS ? '⤢' : '⛶';
+        btnFS.title = isFS ? "To'liq ekrandan chiqish" : "To'liq ekran rejimi";
+        if (this.handleResize) this.handleResize();
+      };
+      document.addEventListener('fullscreenchange', onFSChange);
+      document.addEventListener('webkitfullscreenchange', onFSChange);
     }
 
     // Modal tugmalar
     const handleStart = (e) => {
       if (e) e.preventDefault();
       resumeAudio();
+      triggerHaptic();
       this.startFromFirstLevel();
     };
 
@@ -1927,18 +2083,22 @@ class GameEngine {
 
     if (this.btnRetryLevel) {
       this.btnRetryLevel.addEventListener('click', handleStart);
+      this.btnRetryLevel.addEventListener('pointerdown', handleStart);
     }
     if (this.btnRestartVictory) {
       this.btnRestartVictory.addEventListener('click', handleStart);
+      this.btnRestartVictory.addEventListener('pointerdown', handleStart);
     }
     if (this.btnNextLevel) {
       this.btnNextLevel.addEventListener('click', handleStart);
+      this.btnNextLevel.addEventListener('pointerdown', handleStart);
     }
 
     if (this.btnDimensionToggle) {
       this.btnDimensionToggle.addEventListener('click', (e) => {
         if (e) e.preventDefault();
         resumeAudio();
+        triggerHaptic();
         this.toggleDimension();
       });
     }
@@ -1946,6 +2106,7 @@ class GameEngine {
     if (this.btnSoundToggle) {
       this.btnSoundToggle.addEventListener('click', () => {
         resumeAudio();
+        triggerHaptic();
         const m = sounds.toggleMute();
         this.btnSoundToggle.textContent = m ? '🔇' : '🔊';
         this.showToast(m ? "Ovoz o'chirildi" : "Ovoz yoqildi");
@@ -1960,6 +2121,10 @@ class GameEngine {
     this.state = 'PLAYING';
     this.timeLeft = 400;
     this.timeCounter = 0;
+
+    if (this.threeRenderer && this.threeRenderer.enabled) {
+      this.threeRenderer.snapCamera(this);
+    }
 
     [this.screenStart, this.screenGameOver, this.screenVictory, this.screenLevelComplete].forEach(s => {
       if (s) {
@@ -2210,7 +2375,7 @@ class GameEngine {
     // 2D Kamera: O'yinchilarni kuzatadi
     const midX = (this.player.x + this.player2.x) / 2;
     this.camera.x += (midX - this.canvas.width / 2 - this.camera.x) * 0.1;
-    ctx.translate(-Math.round(this.camera.x), 720 - 40);
+    ctx.translate(-Math.round(this.camera.x), (this.canvas.height || 720) - 40);
     ctx.scale(1, -1); // Canvas Y coordinate inversion
 
     // Bloklar
